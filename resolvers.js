@@ -5,33 +5,26 @@ const jwt = require('jsonwebtoken');
 
 exports.resolvers = {
 	Query: {
-		getCurrentUser: async (parent, args, { user, sub }) => {
-			return await User.findById(sub);
+		getCurrentUser: async (parent, args, { user }) => {
+			return await User.findById(user._id);
 		},
 
-		getUserBookings: async (parent, args, { user }) => {
-			return await Booking.find({ username: user.username });
+		getUserBookings: async (parent, args) => {
+			return await Booking.find({ username: args.username });
 		},
 
 		getAdminListings: async (parent, args) => {
-			adminList = User.find({ type: 'admin' });
-
-			let adminListings;
-			for (admin in adminList) {
-				adminListings += Listing.find({ username: admin.username });
-			}
-			return await adminListings;
+			// Get all, since we're assuming they're created by admins.
+			return await Listing.find({});
 		},
 
-		getAdminCreatedListings: async (parent, args, { user }) => {
-			if (user.type != 'admin') {
-				return null;
-			}
-			return await Listing.find({ username: user.username });
+		getAdminCreatedListings: async (parent, args) => {
+			console.log(`This is the type of listing.find: ${typeof Listing.find({ username: args.username })}`);
+			return await Listing.find({ username: args.username });
 		},
 
 		searchListingByName: async (parent, args) => {
-			return await Listing.find({ username: args.username });
+			return await Listing.find({ listing_title: args.listing_title });
 		},
 
 		searchListingByCity: async (parents, args) => {
@@ -48,14 +41,11 @@ exports.resolvers = {
 			let user = await User.findOne({ username: args.username, password: args.password });
 			return await jwt.sign({ user }, 'SUPER_SECRET', {
 				algorithm: 'HS256',
-				subject: user._id.toString(),
 				expiresIn: '1d'
 			});
 		},
 
 		createUser: async (parent, args) => {
-			console.log(args);
-			console.log('wad');
 			let newUser = User({ ...args });
 			console.log(newUser);
 			return newUser.save();

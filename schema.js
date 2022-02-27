@@ -38,15 +38,15 @@ type Booking {
 
 type Query {
     """ 
-    Gets current user who is logged in
+    Gets current user who is logged in. NOT USED
     """
     getCurrentUser: User
 
 
     """ 
-    Gets current logged in user's bookings
+    Gets user's bookings
     """
-    getUserBookings: [Booking]
+    getUserBookings(username: String!): [Booking]
 
 
     """ 
@@ -64,7 +64,7 @@ type Query {
     """ 
     Search listing by Name
     """
-    searchListingByName(username: String!): [Listing]
+    searchListingByName(listing_title: String!): [Listing]
 
 
     """ 
@@ -112,6 +112,7 @@ type Mutation {
         booking_id: String!
         booking_start: String!
         booking_end: String!
+        username: String!
     ): Booking
 }
 
