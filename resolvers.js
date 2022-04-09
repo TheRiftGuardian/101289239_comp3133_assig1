@@ -5,11 +5,15 @@ const jwt = require('jsonwebtoken');
 
 exports.resolvers = {
 	Query: {
-		getCurrentUser: async (parent, args, { user }) => {
-			return await User.findById(user._id);
+		getCurrentUser: async (parent, args, { user, sub }) => {
+			console.log(User.findById(sub));
+			return await User.findById(sub);
 		},
 
-		getUserBookings: async (parent, args) => {
+		getCurrentUserBookings: async (parent, args, { user }) => {
+			return await Booking.find({ username: user.username });
+		},
+		getUserBookings: async (parent, args, { user }) => {
 			return await Booking.find({ username: args.username });
 		},
 
@@ -19,8 +23,17 @@ exports.resolvers = {
 		},
 
 		getAdminCreatedListings: async (parent, args) => {
-			console.log(`This is the type of listing.find: ${typeof Listing.find({ username: args.username })}`);
 			return await Listing.find({ username: args.username });
+		},
+
+		searchListingByAny: async (parent, args) => {
+			return await Listing.find({
+				$or: [
+					{ listing_title: new RegExp(args.str, 'i') },
+					{ city: new RegExp(args.str, 'i') },
+					{ postal_code: new RegExp(args.str, 'i') }
+				]
+			});
 		},
 
 		searchListingByName: async (parent, args) => {
@@ -33,31 +46,35 @@ exports.resolvers = {
 
 		searchListingByPCode: async (parents, args) => {
 			return await Listing.find({ postal_code: args.postal_code });
+		},
+		searchListingByID: async (parent, args) => {
+			return await Listing.find({ listing_id: args.listing_id });
 		}
 	},
 
 	Mutation: {
-		login: async (parent, args) => {
+		login: async (parent, args, { res }) => {
 			let user = await User.findOne({ username: args.username, password: args.password });
 			return await jwt.sign({ user }, 'SUPER_SECRET', {
 				algorithm: 'HS256',
+				subject: user._id.toString(),
 				expiresIn: '1d'
 			});
 		},
 
 		createUser: async (parent, args) => {
-			let newUser = User({ ...args });
+			let newUser = new User({ ...args });
 			console.log(newUser);
 			return newUser.save();
 		},
 
-		createListing: async (parent, args) => {
-			let newListing = Listing({ ...args });
+		createListing: async (parent, args, { user }) => {
+			let newListing = await Listing({ ...args });
 			return newListing.save();
 		},
 
-		createBooking: async (parent, args) => {
-			let newBooking = Booking({ ...args });
+		createBooking: async (parent, args, { user }) => {
+			let newBooking = await Booking({ ...args });
 			return newBooking.save();
 		}
 	}

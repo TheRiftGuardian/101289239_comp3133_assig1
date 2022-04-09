@@ -38,7 +38,7 @@ type Booking {
 
 type Query {
     """ 
-    Gets current user who is logged in. NOT USED
+    Gets current user who is logged in. 
     """
     getCurrentUser: User
 
@@ -48,6 +48,11 @@ type Query {
     """
     getUserBookings(username: String!): [Booking]
 
+
+    """ 
+    Gets current user's bookings
+    """
+    getCurrentUserBookings: [Booking]
 
     """ 
     View all listings created by those with the role of Admin
@@ -60,6 +65,12 @@ type Query {
     """
     getAdminCreatedListings(username: String!): [Listing]
     
+
+    """ 
+    Search Listings that contain string
+    """
+    searchListingByAny(str: String!): [Listing]
+
 
     """ 
     Search listing by Name
@@ -77,6 +88,11 @@ type Query {
     Search listing by Postal Code
     """
     searchListingByPCode(postal_code: String!): [Listing]
+
+    """ 
+    Obtain listing by ID
+    """
+    searchListingByID(listing_id: String!): [Listing]
 }
 
 type Mutation {
