@@ -55,6 +55,9 @@ exports.resolvers = {
 	Mutation: {
 		login: async (parent, args, { res }) => {
 			let user = await User.findOne({ username: args.username, password: args.password });
+			if (user == null) {
+				return null;
+			}
 			return await jwt.sign({ user }, 'SUPER_SECRET', {
 				algorithm: 'HS256',
 				subject: user._id.toString(),
